@@ -14,16 +14,9 @@
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState } = React;
     const { createStore } = Redux;
     const { Provider, useSelector, useDispatch } = ReactRedux;
-    const { BrowserRouter, Route, Routes, Link, useNavigate } = {
-      BrowserRouter: window.ReactRouterDOM.BrowserRouter,
-      Route: window.ReactRouterDOM.Route,
-      Routes: window.ReactRouterDOM.Routes,
-      Link: window.ReactRouterDOM.Link,
-      useNavigate: window.ReactRouterDOM.useNavigate
-    };
 
     // Redux setup
     const initialState = {
@@ -85,28 +78,28 @@
     const store = createStore(cartReducer);
 
     // Header Component
-    const Header = () => {
+    const Header = ({ setPage }) => {
       const cart = useSelector(state => state.cart);
       const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
       return (
         <header className="bg-green-600 text-white p-4 flex justify-between items-center">
-          <Link to="/" className="text-xl font-bold">Houseplant Store</Link>
+          <button onClick={() => setPage('landing')} className="text-xl font-bold">Houseplant Store</button>
           <nav>
-            <Link to="/products" className="mr-4">Products</Link>
-            <Link to="/cart" className="flex items-center">
+            <button onClick={() => setPage('products')} className="mr-4">Products</button>
+            <button onClick={() => setPage('cart')} className="flex items-center">
               <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               <span>{totalItems}</span>
-            </Link>
+            </button>
           </nav>
         </header>
       );
     };
 
     // Landing Page Component
-    const LandingPage = () => {
+    const LandingPage = ({ setPage }) => {
       return (
         <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('https://via.placeholder.com/1920x1080?text=Plants')" }}>
           <div className="text-center pt-20">
@@ -114,9 +107,9 @@
             <p className="text-lg text-gray-700 max-w-2xl mx-auto mb-6">
               Welcome to Houseplant Store, your one-stop shop for beautiful and healthy houseplants. We offer a variety of plants to bring life and greenery to your home.
             </p>
-            <Link to="/products">
-              <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">Get Started</button>
-            </Link>
+            <button onClick={() => setPage('products')} className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+              Get Started
+            </button>
           </div>
         </div>
       );
@@ -163,10 +156,9 @@
     };
 
     // Shopping Cart Page Component
-    const ShoppingCartPage = () => {
+    const ShoppingCartPage = ({ setPage }) => {
       const cart = useSelector(state => state.cart);
       const dispatch = useDispatch();
-      const navigate = useNavigate();
 
       const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
       const totalCost = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
@@ -220,7 +212,7 @@
               Checkout
             </button>
             <button
-              onClick={() => navigate('/products')}
+              onClick={() => setPage('products')}
               className="bg-green-600 text-white px-4 py-2 rounded"
             >
               Continue Shopping
@@ -232,16 +224,14 @@
 
     // App Component
     const App = () => {
+      const [page, setPage] = useState('landing');
+
       return (
         <Provider store={store}>
-          <BrowserRouter>
-            <Header />
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/products" element={<ProductListingPage />} />
-              <Route path="/cart" element={<ShoppingCartPage />} />
-            </Routes>
-          </BrowserRouter>
+          {page !== 'landing' && <Header setPage={setPage} />}
+          {page === 'landing' && <LandingPage setPage={setPage} />}
+          {page === 'products' && <ProductListingPage />}
+          {page === 'cart' && <ShoppingCartPage setPage={setPage} />}
         </Provider>
       );
     };
@@ -249,7 +239,5 @@
     // Render App
     ReactDOM.render(<App />, document.getElementById('root'));
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/react-router-dom@6.22.3/dist/umd/react-router-dom.min.js"></script>
 </body>
-
 </html>
